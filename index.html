@@ -2,10 +2,9 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>舒尔特方格训练</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -13,7 +12,6 @@
       box-sizing: border-box;
     }
 
-    /* 主题1: 深色科技风 */
     :root {
       --primary-start: #00D9FF;
       --primary-end: #0066FF;
@@ -29,23 +27,21 @@
       --shadow: rgba(0, 0, 0, 0.3);
     }
 
-    /* 主题2: 白色简约风 */
     [data-theme="light"] {
       --primary-start: #0066FF;
       --primary-end: #00D9FF;
       --success: #00C853;
       --error: #FF5252;
-      --bg-gradient: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 50%, #ffffff 100%);
+      --bg-gradient: linear-gradient(135deg, #e0e0e0 0%, #d5d5d5 50%, #cccccc 100%);
       --text-primary: #1a1a1a;
       --text-secondary: rgba(0, 0, 0, 0.6);
-      --card-bg: rgba(255, 255, 255, 0.7);
-      --card-border: rgba(0, 0, 0, 0.1);
-      --grid-color: rgba(0, 0, 0, 0.03);
-      --cell-bg: rgba(255, 255, 255, 0.8);
-      --shadow: rgba(0, 0, 0, 0.1);
+      --card-bg: rgba(255, 255, 255, 0.6);
+      --card-border: rgba(0, 0, 0, 0.12);
+      --grid-color: rgba(0, 0, 0, 0.04);
+      --cell-bg: rgba(255, 255, 255, 0.7);
+      --shadow: rgba(0, 0, 0, 0.15);
     }
 
-    /* 主题3: 纯黑质感风 */
     [data-theme="dark"] {
       --primary-start: #ffffff;
       --primary-end: #cccccc;
@@ -70,11 +66,9 @@
       flex-direction: column;
       align-items: center;
       padding: 20px;
-      overflow-x: hidden;
       transition: background 0.3s ease;
     }
 
-    /* 背景网格效果 */
     body::before {
       content: '';
       position: fixed;
@@ -93,29 +87,19 @@
     .container {
       position: relative;
       z-index: 1;
-      width: 100%;
-      max-width: 700px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    /* 标题区域 */
-    header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
     h1 {
       font-family: 'Orbitron', monospace;
-      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-size: 2rem;
       font-weight: 900;
       background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 0 40px rgba(0, 217, 255, 0.3);
-      letter-spacing: 2px;
       margin-bottom: 8px;
     }
 
@@ -124,9 +108,9 @@
       color: var(--text-secondary);
       letter-spacing: 3px;
       text-transform: uppercase;
+      margin-bottom: 25px;
     }
 
-    /* 主题切换器 */
     .theme-switcher {
       position: fixed;
       top: 20px;
@@ -143,7 +127,6 @@
       border: 2px solid var(--card-border);
       cursor: pointer;
       transition: all 0.3s ease;
-      position: relative;
     }
 
     .theme-btn:hover {
@@ -167,275 +150,6 @@
       background: linear-gradient(135deg, #000000, #333333);
     }
 
-    /* 角色选择器 */
-    .character-selector {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 100;
-    }
-
-    .character-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 25px;
-      color: var(--text-primary);
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.9rem;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-    }
-
-    .character-btn:hover {
-      border-color: var(--primary-start);
-      box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
-    }
-
-    .character-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-    }
-
-    .character-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      margin-top: 8px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 8px;
-      backdrop-filter: blur(20px);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: all 0.3s ease;
-      min-width: 180px;
-    }
-
-    .character-dropdown.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    .character-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .character-option:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .character-option.selected {
-      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-    }
-
-    .character-option .character-avatar {
-      width: 36px;
-      height: 36px;
-    }
-
-    .character-option .character-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .character-option .character-name {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    /* 排行榜 */
-    .leaderboard-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 100;
-      padding: 12px 24px;
-      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-      border: none;
-      border-radius: 25px;
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
-      transition: all 0.3s ease;
-    }
-
-    .leaderboard-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 30px rgba(0, 217, 255, 0.5);
-    }
-
-    .leaderboard-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .leaderboard-overlay.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .leaderboard-panel {
-      width: 90%;
-      max-width: 500px;
-      max-height: 80vh;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 24px;
-      backdrop-filter: blur(20px);
-      overflow-y: auto;
-    }
-
-    .leaderboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .leaderboard-title {
-      font-family: 'Orbitron', monospace;
-      font-size: 1.5rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .close-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 1px solid var(--card-border);
-      background: transparent;
-      color: var(--text-primary);
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .close-btn:hover {
-      background: var(--error);
-      border-color: var(--error);
-    }
-
-    .leaderboard-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .leaderboard-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      transition: transform 0.2s;
-    }
-
-    .leaderboard-item:hover {
-      transform: scale(1.02);
-    }
-
-    .leaderboard-item.top-1 {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.2));
-      border: 1px solid rgba(255, 215, 0, 0.5);
-    }
-
-    .leaderboard-item.top-2 {
-      background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(169, 169, 169, 0.2));
-      border: 1px solid rgba(192, 192, 192, 0.5);
-    }
-
-    .leaderboard-item.top-3 {
-      background: linear-gradient(135deg, rgba(205, 127, 50, 0.3), rgba(183, 86, 0, 0.2));
-      border: 1px solid rgba(205, 127, 50, 0.5);
-    }
-
-    .rank {
-      font-family: 'Orbitron', monospace;
-      font-size: 1.2rem;
-      font-weight: 700;
-      min-width: 40px;
-      text-align: center;
-    }
-
-    .rank-icon {
-      font-size: 1.5rem;
-    }
-
-    .leaderboard-character {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-
-    .leaderboard-info {
-      flex: 1;
-    }
-
-    .leaderboard-name {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .leaderboard-character-name {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-    }
-
-    .leaderboard-score {
-      font-family: 'Orbitron', monospace;
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--primary-start);
-    }
-
-    .no-data {
-      text-align: center;
-      color: var(--text-secondary);
-      padding: 40px;
-    }
-
-    /* 模式切换和工具栏 */
     .toolbar {
       display: flex;
       align-items: center;
@@ -453,7 +167,25 @@
       backdrop-filter: blur(10px);
     }
 
-    /* 随机按钮 */
+    .mode-btn {
+      padding: 10px 28px;
+      border-radius: 50px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+    }
+
     .random-btn {
       width: 48px;
       height: 48px;
@@ -465,7 +197,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s ease;
       backdrop-filter: blur(10px);
     }
 
@@ -474,11 +206,6 @@
       color: white;
       border-color: var(--primary-start);
       transform: rotate(180deg);
-      box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
-    }
-
-    .random-btn:active {
-      transform: rotate(360deg) scale(0.95);
     }
 
     .random-btn svg {
@@ -486,89 +213,60 @@
       height: 22px;
     }
 
-    .mode-btn {
-      padding: 10px 28px;
-      border: none;
-      border-radius: 30px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      background: transparent;
-      color: var(--text-secondary);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .mode-btn:hover {
-      color: var(--text-primary);
-    }
-
-    .mode-btn.active {
-      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-      color: white;
-      box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
-    }
-
-    /* 计时器区域 */
-    .timer-section {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-
-    .timer-label {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 5px;
-    }
-
     .timer {
       font-family: 'Orbitron', monospace;
-      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-size: 3rem;
       font-weight: 700;
-      color: var(--primary-start);
-      text-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
-      letter-spacing: 4px;
+      color: var(--text-primary);
+      margin-bottom: 20px;
     }
 
     .timer.running {
-      animation: timerPulse 1s ease-in-out infinite;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    @keyframes timerPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.85; }
+    .progress-bar {
+      width: 100%;
+      max-width: 400px;
+      height: 6px;
+      background: var(--card-bg);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 25px;
+      border: 1px solid var(--card-border);
     }
 
-    /* 游戏面板 */
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-start), var(--primary-end));
+      border-radius: 10px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
     .game-board {
       display: grid;
-      gap: 10px;
-      padding: 20px;
+      gap: 6px;
+      padding: 12px;
       background: var(--card-bg);
-      border-radius: 20px;
       border: 1px solid var(--card-border);
-      backdrop-filter: blur(20px);
-      box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
     }
 
     .game-board.grid-5 {
+      width: 270px;
       grid-template-columns: repeat(5, 1fr);
-      width: min(400px, 90vw);
     }
 
     .game-board.grid-7 {
+      width: 350px;
       grid-template-columns: repeat(7, 1fr);
-      width: min(520px, 95vw);
     }
 
-    /* 方格卡片 */
     .cell {
       aspect-ratio: 1;
       display: flex;
@@ -576,35 +274,23 @@
       justify-content: center;
       background: var(--cell-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 10px;
       font-family: 'Poppins', sans-serif;
-      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
+      transition: all 0.2s ease;
       user-select: none;
-      backdrop-filter: blur(10px);
     }
 
-    .cell::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.15));
-      opacity: 0;
-      transition: opacity 0.2s;
+    .game-board.grid-7 .cell {
+      font-size: 0.85rem;
     }
 
-    .cell:hover:not(.completed):not(.disabled) {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 8px 25px var(--shadow);
+    .cell:hover:not(.completed) {
+      transform: translateY(-2px);
       border-color: var(--primary-start);
-    }
-
-    .cell:hover:not(.completed):not(.disabled)::before {
-      opacity: 1;
+      box-shadow: 0 4px 15px var(--shadow);
     }
 
     .cell.completed {
@@ -612,57 +298,33 @@
       border-color: var(--success);
       color: white;
       cursor: default;
-      animation: correctPulse 0.4s ease-out;
-    }
-
-    @keyframes correctPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
     }
 
     .cell.wrong {
-      background: linear-gradient(145deg, var(--error), #D32F2F);
+      animation: wrongShake 0.4s ease-out;
+      background: var(--error);
       border-color: var(--error);
-      animation: shake 0.4s ease-out;
+      color: white;
     }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-8px); }
-      40% { transform: translateX(8px); }
-      60% { transform: translateX(-6px); }
-      80% { transform: translateX(6px); }
+    .hint {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
     }
 
-    .cell.faded {
-      opacity: 0.4;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .cell.disabled {
-      cursor: default;
-    }
-
-    /* 卡片入场动画 */
-    .cell.entering {
-      opacity: 0;
-      transform: scale(0.5);
-    }
-
-    /* 完成信息 */
     .completion-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(13, 27, 42, 0.95);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 100;
+      z-index: 300;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.4s;
+      transition: all 0.4s ease;
     }
 
     .completion-overlay.show {
@@ -670,75 +332,116 @@
       visibility: visible;
     }
 
-    .completion-content {
+    .completion-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 40px;
       text-align: center;
-      transform: scale(0.8);
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .completion-overlay.show .completion-content {
-      transform: scale(1);
+      backdrop-filter: blur(20px);
     }
 
     .completion-title {
       font-family: 'Orbitron', monospace;
-      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-size: 1.8rem;
       font-weight: 900;
-      background: linear-gradient(135deg, #FFD700, #FF6B6B, #00E676, #00D9FF);
-      background-size: 300% 300%;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: gradientShift 3s ease infinite;
-      margin-bottom: 20px;
-    }
-
-    @keyframes gradientShift {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-    }
-
-    .completion-time {
-      font-family: 'Orbitron', monospace;
-      font-size: clamp(3rem, 10vw, 5rem);
-      font-weight: 700;
-      color: var(--primary-start);
-      text-shadow: 0 0 50px rgba(0, 217, 255, 0.6);
       margin-bottom: 10px;
     }
 
-    .completion-label {
+    .completion-subtitle {
       font-size: 1rem;
       color: var(--text-secondary);
-      margin-bottom: 40px;
+      margin-bottom: 20px;
+    }
+
+    .final-time {
+      font-family: 'Orbitron', monospace;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--success);
+      margin-bottom: 20px;
+    }
+
+    .focus-rating {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 25px;
+      padding: 15px 25px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+    }
+
+    .focus-rating-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
       letter-spacing: 2px;
     }
 
-    .restart-btn {
-      padding: 16px 48px;
-      font-family: 'Poppins', sans-serif;
+    .focus-rating-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: 700;
       font-size: 1.1rem;
-      font-weight: 600;
-      color: white;
-      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
-      border: none;
+    }
+
+    .focus-rating-badge.excellent {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #1a1a1a;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    }
+
+    .focus-rating-badge.good {
+      background: linear-gradient(135deg, #00E676, #00C853);
+      color: #1a1a1a;
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+    }
+
+    .focus-rating-badge.poor {
+      background: linear-gradient(135deg, #FF7043, #FF5722);
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(255, 112, 67, 0.4);
+    }
+
+    .focus-rating-desc {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .restart-btn {
+      padding: 14px 40px;
       border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 25px rgba(0, 217, 255, 0.4);
+      transition: all 0.3s ease;
     }
 
     .restart-btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 35px rgba(0, 217, 255, 0.5);
+      box-shadow: 0 8px 25px rgba(0, 217, 255, 0.4);
     }
 
-    /* 粒子效果容器 */
     .particles {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 101;
+      z-index: 350;
     }
 
     .particle {
@@ -746,202 +449,43 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      animation: particleFly 1.5s ease-out forwards;
+      animation: particleFly 1s ease-out forwards;
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
     }
 
     @keyframes particleFly {
-      0% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(var(--tx), var(--ty)) scale(0);
-      }
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
     }
 
-    /* 底部提示 */
-    .hint {
-      margin-top: 25px;
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-    }
-
-    .hint span {
-      color: var(--primary-start);
-      font-weight: 600;
-    }
-
-    /* 进度指示 */
-    .progress-bar {
-      width: 100%;
-      max-width: 400px;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary-start), var(--primary-end));
-      border-radius: 3px;
-      transition: width 0.3s ease;
-      width: 0%;
-    }
-
-    /* 手机适配 */
     @media (max-width: 480px) {
-      .game-board {
-        gap: 6px;
-        padding: 12px;
-      }
-      
-      .cell {
-        border-radius: 8px;
-        font-size: 1.2rem;
-      }
-      
-      .mode-btn {
-        padding: 8px 20px;
-        font-size: 0.85rem;
-      }
-    }
-
-    /* 11.5英寸平板适配 (横屏约 1024px-1366px) */
-    @media (min-width: 768px) and (max-width: 1366px) {
-      .game-board.grid-5 {
-        width: min(520px, 65vh);
-        gap: 12px;
-        padding: 24px;
-      }
-
-      .game-board.grid-7 {
-        width: min(640px, 65vh);
-        gap: 10px;
-        padding: 22px;
-      }
-
-      .cell {
-        font-size: clamp(1.6rem, 4vw, 2.4rem);
-        border-radius: 14px;
-      }
-
-      .mode-btn {
-        padding: 14px 36px;
-        font-size: 1.1rem;
-      }
-
-      .random-btn {
-        width: 56px;
-        height: 56px;
-      }
-
-      .random-btn svg {
-        width: 26px;
-        height: 26px;
-      }
-
-      .timer {
-        font-size: clamp(3rem, 8vw, 5rem);
-      }
-
-      h1 {
-        font-size: 2.2rem;
-      }
-
-      .subtitle {
-        font-size: 1rem;
-      }
-    }
-
-    /* 大屏幕适配 */
-    @media (min-width: 1367px) {
-      .game-board.grid-5 {
-        width: 540px;
-        gap: 14px;
-        padding: 28px;
-      }
-
-      .game-board.grid-7 {
-        width: 680px;
-        gap: 12px;
-        padding: 26px;
-      }
-
-      .cell {
-        font-size: clamp(1.8rem, 2.5vw, 2.4rem);
-        border-radius: 16px;
-      }
+      .game-board.grid-5 { width: 260px; gap: 4px; padding: 8px; grid-template-columns: repeat(5, 1fr); }
+      .game-board.grid-7 { width: 300px; gap: 3px; padding: 6px; grid-template-columns: repeat(7, 1fr); }
+      .cell { font-size: 0.85rem; border-radius: 6px; }
+      .game-board.grid-7 .cell { font-size: 0.7rem; }
+      .mode-btn { padding: 8px 20px; font-size: 0.85rem; }
+      h1 { font-size: 1.5rem; }
+      .timer { font-size: 2.5rem; }
     }
   </style>
 </head>
 <body>
-  <!-- 主题切换 -->
   <div class="theme-switcher">
     <button class="theme-btn theme-1 active" data-theme="default" title="深色科技"></button>
     <button class="theme-btn theme-2" data-theme="light" title="白色简约"></button>
     <button class="theme-btn theme-3" data-theme="dark" title="纯黑质感"></button>
   </div>
 
-  <!-- 角色选择器 -->
-  <div class="character-selector">
-    <button class="character-btn" id="characterBtn">
-      <div class="character-avatar" id="currentAvatar">🦊</div>
-      <span id="currentCharName">狐狸</span>
-      <span>▼</span>
-    </button>
-    <div class="character-dropdown" id="characterDropdown">
-      <div class="character-option selected" data-id="1">
-        <div class="character-avatar" style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">🦊</div>
-        <div class="character-info">
-          <span class="character-name">狐狸</span>
-        </div>
-      </div>
-      <div class="character-option" data-id="2">
-        <div class="character-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">🐼</div>
-        <div class="character-info">
-          <span class="character-name">熊猫</span>
-        </div>
-      </div>
-      <div class="character-option" data-id="3">
-        <div class="character-avatar" style="background: linear-gradient(135deg, #11998e, #38ef7d);">🐯</div>
-        <div class="character-info">
-          <span class="character-name">老虎</span>
-        </div>
-      </div>
-      <div class="character-option" data-id="4">
-        <div class="character-avatar" style="background: linear-gradient(135deg, #FC466B, #3F5EFB);">🦅</div>
-        <div class="character-info">
-          <span class="character-name">老鹰</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 排行榜按钮 -->
-  <button class="leaderboard-btn" id="leaderboardBtn">🏆 排行榜</button>
-
-  <!-- 排行榜弹窗 -->
-  <div class="leaderboard-overlay" id="leaderboardOverlay">
-    <div class="leaderboard-panel">
-      <div class="leaderboard-header">
-        <h2 class="leaderboard-title">🏆 排行榜</h2>
-        <button class="close-btn" id="closeLeaderboard">×</button>
-      </div>
-      <div class="leaderboard-list" id="leaderboardList">
-        <div class="no-data">正在加载...</div>
-      </div>
-    </div>
-  </div>
-
   <div class="container">
-    <header>
-      <h1>舒尔特方格</h1>
-      <p class="subtitle">专注力训练</p>
-    </header>
+    <h1>舒尔特方格训练</h1>
+    <p class="subtitle">专注力训练</p>
 
     <div class="toolbar">
       <div class="mode-switcher">
@@ -949,17 +493,14 @@
         <button class="mode-btn" data-mode="7">7 × 7</button>
       </div>
       <button class="random-btn" id="randomBtn" title="重新打乱">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 12a9 9 0 11-9-9"/>
           <path d="M21 3v9h-9"/>
         </svg>
       </button>
     </div>
 
-    <div class="timer-section">
-      <div class="timer-label">用时</div>
-      <div class="timer" id="timer">00:00.00</div>
-    </div>
+    <div class="timer" id="timer">0.00</div>
 
     <div class="progress-bar">
       <div class="progress-fill" id="progressFill"></div>
@@ -967,37 +508,29 @@
 
     <div class="game-board grid-5" id="gameBoard"></div>
 
-    <p class="hint">点击数字 <span>1</span> 开始训练</p>
+    <p class="hint">点击 <span id="hintNum">1</span> 开始</p>
   </div>
 
-  <!-- 完成弹窗 -->
   <div class="completion-overlay" id="completionOverlay">
-    <div class="completion-content">
-      <h2 class="completion-title">训练完成!</h2>
-      <div class="completion-time" id="finalTime">00:00.00</div>
-      <p class="completion-label">您的专注时间</p>
+    <div class="completion-card">
+      <h2 class="completion-title">恭喜完成！</h2>
+      <p class="completion-subtitle">你的用时是</p>
+      <div class="final-time" id="finalTime">0.00</div>
+      <div class="focus-rating">
+        <span class="focus-rating-label">专注力评级</span>
+        <div class="focus-rating-badge" id="focusRatingBadge">
+          <span id="focusRatingEmoji"></span>
+          <span id="focusRatingText"></span>
+        </div>
+        <p class="focus-rating-desc" id="focusRatingDesc"></p>
+      </div>
       <button class="restart-btn" id="restartBtn">再来一次</button>
     </div>
   </div>
 
-  <!-- 粒子容器 -->
   <div class="particles" id="particles"></div>
 
   <script>
-    // Supabase 配置
-    const SUPABASE_URL = 'https://ydnagwkgimrucgyijynx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkbmFnd2tnaW1ydWNneWlqeW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMTg3OTgsImV4cCI6MjA5Mzg5NDc5OH0.dUS3nvCNutZZ5EbIRAlbachflWZKUlqbWBxpe1xbYnQ';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // 角色数据
-    const characters = {
-      1: { name: '狐狸', emoji: '🦊', gradient: 'linear-gradient(135deg, #FF6B6B, #FF8E53)' },
-      2: { name: '熊猫', emoji: '🐼', gradient: 'linear-gradient(135deg, #667eea, #764ba2)' },
-      3: { name: '老虎', emoji: '🐯', gradient: 'linear-gradient(135deg, #11998e, #38ef7d)' },
-      4: { name: '老鹰', emoji: '🦅', gradient: 'linear-gradient(135deg, #FC466B, #3F5EFB)' }
-    };
-
-    // 游戏状态
     const state = {
       mode: 5,
       numbers: [],
@@ -1006,12 +539,9 @@
       isStarted: false,
       isCompleted: false,
       startTime: null,
-      timerInterval: null,
-      selectedCharacter: 1,
-      playerName: '玩家' + Math.floor(Math.random() * 9999)
+      timerInterval: null
     };
 
-    // DOM 元素
     const gameBoard = document.getElementById('gameBoard');
     const timerDisplay = document.getElementById('timer');
     const progressFill = document.getElementById('progressFill');
@@ -1020,285 +550,159 @@
     const restartBtn = document.getElementById('restartBtn');
     const modeButtons = document.querySelectorAll('.mode-btn');
     const particlesContainer = document.getElementById('particles');
-    const hint = document.querySelector('.hint span');
-    const characterBtn = document.getElementById('characterBtn');
-    const characterDropdown = document.getElementById('characterDropdown');
-    const currentAvatar = document.getElementById('currentAvatar');
-    const currentCharName = document.getElementById('currentCharName');
-    const leaderboardBtn = document.getElementById('leaderboardBtn');
-    const leaderboardOverlay = document.getElementById('leaderboardOverlay');
-    const leaderboardList = document.getElementById('leaderboardList');
-    const closeLeaderboard = document.getElementById('closeLeaderboard');
+    const hintNum = document.getElementById('hintNum');
+    const randomBtn = document.getElementById('randomBtn');
+    const themeButtons = document.querySelectorAll('.theme-btn');
 
-    // 角色选择
-    characterBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      characterDropdown.classList.toggle('show');
-    });
-
-    document.addEventListener('click', () => {
-      characterDropdown.classList.remove('show');
-    });
-
-    document.querySelectorAll('.character-option').forEach(option => {
-      option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const charId = parseInt(option.dataset.id);
-        state.selectedCharacter = charId;
-        
-        document.querySelectorAll('.character-option').forEach(o => o.classList.remove('selected'));
-        option.classList.add('selected');
-        
-        currentAvatar.textContent = characters[charId].emoji;
-        currentAvatar.style.background = characters[charId].gradient;
-        currentCharName.textContent = characters[charId].name;
-        characterDropdown.classList.remove('show');
-      });
-    });
-
-    // 排行榜
-    leaderboardBtn.addEventListener('click', async () => {
-      leaderboardOverlay.classList.add('show');
-      await loadLeaderboard();
-    });
-
-    closeLeaderboard.addEventListener('click', () => {
-      leaderboardOverlay.classList.remove('show');
-    });
-
-    leaderboardOverlay.addEventListener('click', (e) => {
-      if (e.target === leaderboardOverlay) {
-        leaderboardOverlay.classList.remove('show');
-      }
-    });
-
-    async function loadLeaderboard() {
-      leaderboardList.innerHTML = '<div class="no-data">正在加载...</div>';
-      
-      const { data, error } = await supabase
-        .from('game_leaderboard')
-        .select('*')
-        .order('score_ms', { ascending: true })
-        .limit(20);
-
-      if (error) {
-        leaderboardList.innerHTML = '<div class="no-data">加载失败，请重试</div>';
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        leaderboardList.innerHTML = '<div class="no-data">暂无记录，成为第一个吧！</div>';
-        return;
-      }
-
-      const medals = ['🥇', '🥈', '🥉'];
-      leaderboardList.innerHTML = data.map((item, index) => `
-        <div class="leaderboard-item ${index < 3 ? 'top-' + (index + 1) : ''}">
-          <div class="rank">${index < 3 ? medals[index] : '#' + (index + 1)}</div>
-          <div class="leaderboard-character" style="background: ${characters[item.character_id]?.gradient || '#666'}">
-            ${characters[item.character_id]?.emoji || '❓'}
-          </div>
-          <div class="leaderboard-info">
-            <div class="leaderboard-name">${item.player_name}</div>
-            <div class="leaderboard-character-name">${characters[item.character_id]?.name || '未知'}</div>
-          </div>
-          <div class="leaderboard-score">${formatTime(item.score_ms)}</div>
-        </div>
-      `).join('');
-    }
-
-    async function submitScore(scoreMs) {
-      const { error } = await supabase
-        .from('game_leaderboard')
-        .insert({
-          player_name: state.playerName,
-          character_id: state.selectedCharacter,
-          character_name: characters[state.selectedCharacter].name,
-          score_ms: scoreMs,
-          grid_size: state.mode
-        });
-
-      if (error) {
-        console.error('提交分数失败:', error);
-      }
-    }
-
-    // 打乱数组
-    function shuffleArray(array) {
-      const shuffled = [...array];
-      for (let i = shuffled.length - 1; i > 0; i--) {
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        [arr[i], arr[j]] = [arr[j], arr[i]];
       }
-      return shuffled;
+      return arr;
     }
 
-    // 初始化游戏
+    function formatTime(ms) {
+      return (ms / 1000).toFixed(2);
+    }
+
     function initGame() {
-      // 重置状态
+      state.currentNumber = 1;
+      state.totalNumbers = state.mode * state.mode;
+      state.numbers = shuffle(Array.from({ length: state.totalNumbers }, (_, i) => i + 1));
       state.isStarted = false;
       state.isCompleted = false;
-      state.currentNumber = 1;
       state.startTime = null;
-      clearInterval(state.timerInterval);
       
-      // 设置总数
-      state.totalNumbers = state.mode * state.mode;
-      state.numbers = shuffleArray(Array.from({ length: state.totalNumbers }, (_, i) => i + 1));
-      
-      // 更新 UI
-      timerDisplay.textContent = '00:00.00';
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+
+      timerDisplay.textContent = '0.00';
       timerDisplay.classList.remove('running');
       progressFill.style.width = '0%';
+      hintNum.textContent = '1';
       completionOverlay.classList.remove('show');
-      hint.textContent = '1';
-      hint.parentElement.style.opacity = '1';
-      
-      // 更新游戏板
-      gameBoard.innerHTML = '';
+
       gameBoard.className = `game-board grid-${state.mode}`;
-      
-      // 创建方格
+      gameBoard.innerHTML = '';
+
       state.numbers.forEach((num, index) => {
         const cell = document.createElement('div');
-        cell.className = 'cell entering';
+        cell.className = 'cell';
         cell.textContent = num;
         cell.dataset.number = num;
         cell.addEventListener('click', () => handleCellClick(cell, num));
-        gameBoard.appendChild(cell);
         
-        // 入场动画延迟
         setTimeout(() => {
-          cell.classList.remove('entering');
-        }, 50 + index * 20);
+          gameBoard.appendChild(cell);
+        }, index * 15);
       });
     }
 
-    // 处理方格点击
     function handleCellClick(cell, num) {
-      if (state.isCompleted) return;
-      if (cell.classList.contains('completed')) return;
-      
-      // 隐藏提示
-      hint.parentElement.style.opacity = '0';
-      
-      // 第一个数字开始计时
-      if (num === 1 && !state.isStarted) {
-        startTimer();
-        state.isStarted = true;
-      }
-      
-      if (!state.isStarted) return;
-      
+      if (state.isCompleted || cell.classList.contains('completed')) return;
+
       if (num === state.currentNumber) {
-        // 正确
         cell.classList.add('completed');
         state.currentNumber++;
-        updateProgress();
-        
-        if (state.currentNumber > state.totalNumbers) {
+        hintNum.textContent = num === state.totalNumbers ? '🎉' : num + 1;
+        progressFill.style.width = `${(num / state.totalNumbers) * 100}%`;
+
+        if (num === 1) {
+          state.isStarted = true;
+          state.startTime = performance.now();
+          timerDisplay.classList.add('running');
+          state.timerInterval = setInterval(() => {
+            timerDisplay.textContent = formatTime(performance.now() - state.startTime);
+          }, 10);
+        }
+
+        if (num === state.totalNumbers) {
           completeGame();
-        } else {
-          hint.textContent = state.currentNumber;
         }
       } else {
-        // 错误
         cell.classList.add('wrong');
-        setTimeout(() => {
-          cell.classList.remove('wrong');
-        }, 400);
+        setTimeout(() => cell.classList.remove('wrong'), 400);
       }
     }
 
-    // 更新进度条
-    function updateProgress() {
-      const progress = ((state.currentNumber - 1) / state.totalNumbers) * 100;
-      progressFill.style.width = `${progress}%`;
-    }
-
-    // 开始计时
-    function startTimer() {
-      state.startTime = performance.now();
-      timerDisplay.classList.add('running');
-      
-      state.timerInterval = setInterval(() => {
-        const elapsed = performance.now() - state.startTime;
-        timerDisplay.textContent = formatTime(elapsed);
-      }, 10);
-    }
-
-    // 格式化时间
-    function formatTime(ms) {
-      const totalSeconds = Math.floor(ms / 1000);
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = totalSeconds % 60;
-      const centiseconds = Math.floor((ms % 1000) / 10);
-      
-      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
-    }
-
-    // 完成游戏
     function completeGame() {
       state.isCompleted = true;
       clearInterval(state.timerInterval);
       timerDisplay.classList.remove('running');
-      
-      const finalTime = performance.now() - state.startTime;
-      finalTimeDisplay.textContent = formatTime(finalTime);
+      const time = performance.now() - state.startTime;
+      finalTimeDisplay.textContent = formatTime(time);
       progressFill.style.width = '100%';
-      
-      // 提交分数到排行榜
-      submitScore(Math.round(finalTime));
-      
-      // 创建庆祝粒子
       createParticles();
-      
-      // 显示完成弹窗
-      setTimeout(() => {
-        completionOverlay.classList.add('show');
-      }, 500);
+      calculateFocusRating(time);
+      setTimeout(() => completionOverlay.classList.add('show'), 500);
     }
 
-    // 创建粒子效果
-    function createParticles() {
-      const colors = ['#00D9FF', '#00E676', '#FFD700', '#FF6B6B', '#9C27B0'];
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+    function calculateFocusRating(time) {
+      const ratingBadge = document.getElementById('focusRatingBadge');
+      const ratingEmoji = document.getElementById('focusRatingEmoji');
+      const ratingText = document.getElementById('focusRatingText');
+      const ratingDesc = document.getElementById('focusRatingDesc');
       
-      for (let i = 0; i < 60; i++) {
-        setTimeout(() => {
-          const particle = document.createElement('div');
-          particle.className = 'particle';
-          particle.style.left = `${centerX}px`;
-          particle.style.top = `${centerY}px`;
-          particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-          
-          const angle = Math.random() * Math.PI * 2;
-          const distance = 100 + Math.random() * 300;
-          const tx = Math.cos(angle) * distance;
-          const ty = Math.sin(angle) * distance - 100;
-          
-          particle.style.setProperty('--tx', `${tx}px`);
-          particle.style.setProperty('--ty', `${ty}px`);
-          
-          particlesContainer.appendChild(particle);
-          
-          setTimeout(() => {
-            particle.remove();
-          }, 1500);
-        }, i * 20);
+      const mode = state.mode;
+      const totalCells = mode * mode;
+      const avgTimePerCell = time / totalCells;
+      
+      // 评级标准（基于每格平均用时，单位：毫秒）
+      // 5x5模式: 优秀 < 800ms, 良好 < 1200ms
+      // 7x7模式: 优秀 < 600ms, 良好 < 900ms
+      const excellentThreshold = mode === 5 ? 800 : 600;
+      const goodThreshold = mode === 5 ? 1200 : 900;
+      
+      ratingBadge.className = 'focus-rating-badge';
+      
+      if (avgTimePerCell < excellentThreshold) {
+        ratingBadge.classList.add('excellent');
+        ratingEmoji.textContent = '🌟';
+        ratingText.textContent = '优秀';
+        ratingDesc.textContent = '专注力极佳！';
+      } else if (avgTimePerCell < goodThreshold) {
+        ratingBadge.classList.add('good');
+        ratingEmoji.textContent = '👍';
+        ratingText.textContent = '良好';
+        ratingDesc.textContent = '专注力不错！';
+      } else {
+        ratingBadge.classList.add('poor');
+        ratingEmoji.textContent = '💪';
+        ratingText.textContent = '一般';
+        ratingDesc.textContent = '继续加油训练！';
       }
     }
 
-    // 模式切换
+    function createParticles() {
+      particlesContainer.innerHTML = '';
+      const colors = ['#00D9FF', '#FF6B6B', '#00E676', '#FFD700', '#FF8E53'];
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      for (let i = 0; i < 40; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = centerX + 'px';
+        particle.style.top = centerY + 'px';
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        
+        const angle = Math.random() * 360 * (Math.PI / 180);
+        const distance = 100 + Math.random() * 150;
+        particle.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+        particle.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+        
+        particlesContainer.appendChild(particle);
+        setTimeout(() => particle.remove(), 1000);
+      }
+    }
+
     modeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        if (state.isStarted && !state.isCompleted) {
-          if (!confirm('游戏正在进行中，切换模式将重新开始，确定吗？')) {
-            return;
-          }
-        }
-        
+        if (state.isStarted && !state.isCompleted && !confirm('游戏进行中，切换模式将重新开始？')) return;
         modeButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.mode = parseInt(btn.dataset.mode);
@@ -1306,27 +710,17 @@
       });
     });
 
-    // 重新开始按钮
     restartBtn.addEventListener('click', initGame);
 
-    // 随机打乱按钮
-    const randomBtn = document.getElementById('randomBtn');
     randomBtn.addEventListener('click', () => {
-      if (state.isStarted && !state.isCompleted) {
-        if (!confirm('游戏正在进行中，重新打乱将重新开始，确定吗？')) {
-          return;
-        }
-      }
+      if (state.isStarted && !state.isCompleted && !confirm('游戏进行中，重新打乱将重新开始？')) return;
       initGame();
     });
 
-    // 主题切换
-    const themeButtons = document.querySelectorAll('.theme-btn');
     themeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         themeButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
         const theme = btn.dataset.theme;
         if (theme === 'default') {
           document.body.removeAttribute('data-theme');
@@ -1336,7 +730,6 @@
       });
     });
 
-    // 初始化
     initGame();
   </script>
 </body>
