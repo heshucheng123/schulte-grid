@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>舒尔特方格训练</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
       margin: 0;
@@ -164,6 +165,274 @@
 
     .theme-btn.theme-3 {
       background: linear-gradient(135deg, #000000, #333333);
+    }
+
+    /* 角色选择器 */
+    .character-selector {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+    }
+
+    .character-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 25px;
+      color: var(--text-primary);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .character-btn:hover {
+      border-color: var(--primary-start);
+      box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+    }
+
+    .character-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .character-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 8px;
+      backdrop-filter: blur(20px);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+
+    .character-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .character-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .character-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .character-option.selected {
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+    }
+
+    .character-option .character-avatar {
+      width: 36px;
+      height: 36px;
+    }
+
+    .character-option .character-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .character-option .character-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* 排行榜 */
+    .leaderboard-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      border: none;
+      border-radius: 25px;
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .leaderboard-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 217, 255, 0.5);
+    }
+
+    .leaderboard-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .leaderboard-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .leaderboard-panel {
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      overflow-y: auto;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .leaderboard-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--card-border);
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: var(--error);
+      border-color: var(--error);
+    }
+
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      transition: transform 0.2s;
+    }
+
+    .leaderboard-item:hover {
+      transform: scale(1.02);
+    }
+
+    .leaderboard-item.top-1 {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.2));
+      border: 1px solid rgba(255, 215, 0, 0.5);
+    }
+
+    .leaderboard-item.top-2 {
+      background: linear-gradient(135deg, rgba(192, 192, 192, 0.3), rgba(169, 169, 169, 0.2));
+      border: 1px solid rgba(192, 192, 192, 0.5);
+    }
+
+    .leaderboard-item.top-3 {
+      background: linear-gradient(135deg, rgba(205, 127, 50, 0.3), rgba(183, 86, 0, 0.2));
+      border: 1px solid rgba(205, 127, 50, 0.5);
+    }
+
+    .rank {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .rank-icon {
+      font-size: 1.5rem;
+    }
+
+    .leaderboard-character {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .leaderboard-info {
+      flex: 1;
+    }
+
+    .leaderboard-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .leaderboard-character-name {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .leaderboard-score {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary-start);
+    }
+
+    .no-data {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 40px;
     }
 
     /* 模式切换和工具栏 */
@@ -617,6 +886,57 @@
     <button class="theme-btn theme-3" data-theme="dark" title="纯黑质感"></button>
   </div>
 
+  <!-- 角色选择器 -->
+  <div class="character-selector">
+    <button class="character-btn" id="characterBtn">
+      <div class="character-avatar" id="currentAvatar">🦊</div>
+      <span id="currentCharName">狐狸</span>
+      <span>▼</span>
+    </button>
+    <div class="character-dropdown" id="characterDropdown">
+      <div class="character-option selected" data-id="1">
+        <div class="character-avatar" style="background: linear-gradient(135deg, #FF6B6B, #FF8E53);">🦊</div>
+        <div class="character-info">
+          <span class="character-name">狐狸</span>
+        </div>
+      </div>
+      <div class="character-option" data-id="2">
+        <div class="character-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">🐼</div>
+        <div class="character-info">
+          <span class="character-name">熊猫</span>
+        </div>
+      </div>
+      <div class="character-option" data-id="3">
+        <div class="character-avatar" style="background: linear-gradient(135deg, #11998e, #38ef7d);">🐯</div>
+        <div class="character-info">
+          <span class="character-name">老虎</span>
+        </div>
+      </div>
+      <div class="character-option" data-id="4">
+        <div class="character-avatar" style="background: linear-gradient(135deg, #FC466B, #3F5EFB);">🦅</div>
+        <div class="character-info">
+          <span class="character-name">老鹰</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 排行榜按钮 -->
+  <button class="leaderboard-btn" id="leaderboardBtn">🏆 排行榜</button>
+
+  <!-- 排行榜弹窗 -->
+  <div class="leaderboard-overlay" id="leaderboardOverlay">
+    <div class="leaderboard-panel">
+      <div class="leaderboard-header">
+        <h2 class="leaderboard-title">🏆 排行榜</h2>
+        <button class="close-btn" id="closeLeaderboard">×</button>
+      </div>
+      <div class="leaderboard-list" id="leaderboardList">
+        <div class="no-data">正在加载...</div>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <header>
       <h1>舒尔特方格</h1>
@@ -664,6 +984,19 @@
   <div class="particles" id="particles"></div>
 
   <script>
+    // Supabase 配置
+    const SUPABASE_URL = 'https://ydnagwkgimrucgyijynx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkbmFnd2tnaW1ydWNneWlqeW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMTg3OTgsImV4cCI6MjA5Mzg5NDc5OH0.dUS3nvCNutZZ5EbIRAlbachflWZKUlqbWBxpe1xbYnQ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 角色数据
+    const characters = {
+      1: { name: '狐狸', emoji: '🦊', gradient: 'linear-gradient(135deg, #FF6B6B, #FF8E53)' },
+      2: { name: '熊猫', emoji: '🐼', gradient: 'linear-gradient(135deg, #667eea, #764ba2)' },
+      3: { name: '老虎', emoji: '🐯', gradient: 'linear-gradient(135deg, #11998e, #38ef7d)' },
+      4: { name: '老鹰', emoji: '🦅', gradient: 'linear-gradient(135deg, #FC466B, #3F5EFB)' }
+    };
+
     // 游戏状态
     const state = {
       mode: 5,
@@ -673,7 +1006,9 @@
       isStarted: false,
       isCompleted: false,
       startTime: null,
-      timerInterval: null
+      timerInterval: null,
+      selectedCharacter: 1,
+      playerName: '玩家' + Math.floor(Math.random() * 9999)
     };
 
     // DOM 元素
@@ -686,6 +1021,107 @@
     const modeButtons = document.querySelectorAll('.mode-btn');
     const particlesContainer = document.getElementById('particles');
     const hint = document.querySelector('.hint span');
+    const characterBtn = document.getElementById('characterBtn');
+    const characterDropdown = document.getElementById('characterDropdown');
+    const currentAvatar = document.getElementById('currentAvatar');
+    const currentCharName = document.getElementById('currentCharName');
+    const leaderboardBtn = document.getElementById('leaderboardBtn');
+    const leaderboardOverlay = document.getElementById('leaderboardOverlay');
+    const leaderboardList = document.getElementById('leaderboardList');
+    const closeLeaderboard = document.getElementById('closeLeaderboard');
+
+    // 角色选择
+    characterBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      characterDropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+      characterDropdown.classList.remove('show');
+    });
+
+    document.querySelectorAll('.character-option').forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const charId = parseInt(option.dataset.id);
+        state.selectedCharacter = charId;
+        
+        document.querySelectorAll('.character-option').forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        
+        currentAvatar.textContent = characters[charId].emoji;
+        currentAvatar.style.background = characters[charId].gradient;
+        currentCharName.textContent = characters[charId].name;
+        characterDropdown.classList.remove('show');
+      });
+    });
+
+    // 排行榜
+    leaderboardBtn.addEventListener('click', async () => {
+      leaderboardOverlay.classList.add('show');
+      await loadLeaderboard();
+    });
+
+    closeLeaderboard.addEventListener('click', () => {
+      leaderboardOverlay.classList.remove('show');
+    });
+
+    leaderboardOverlay.addEventListener('click', (e) => {
+      if (e.target === leaderboardOverlay) {
+        leaderboardOverlay.classList.remove('show');
+      }
+    });
+
+    async function loadLeaderboard() {
+      leaderboardList.innerHTML = '<div class="no-data">正在加载...</div>';
+      
+      const { data, error } = await supabase
+        .from('game_leaderboard')
+        .select('*')
+        .order('score_ms', { ascending: true })
+        .limit(20);
+
+      if (error) {
+        leaderboardList.innerHTML = '<div class="no-data">加载失败，请重试</div>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        leaderboardList.innerHTML = '<div class="no-data">暂无记录，成为第一个吧！</div>';
+        return;
+      }
+
+      const medals = ['🥇', '🥈', '🥉'];
+      leaderboardList.innerHTML = data.map((item, index) => `
+        <div class="leaderboard-item ${index < 3 ? 'top-' + (index + 1) : ''}">
+          <div class="rank">${index < 3 ? medals[index] : '#' + (index + 1)}</div>
+          <div class="leaderboard-character" style="background: ${characters[item.character_id]?.gradient || '#666'}">
+            ${characters[item.character_id]?.emoji || '❓'}
+          </div>
+          <div class="leaderboard-info">
+            <div class="leaderboard-name">${item.player_name}</div>
+            <div class="leaderboard-character-name">${characters[item.character_id]?.name || '未知'}</div>
+          </div>
+          <div class="leaderboard-score">${formatTime(item.score_ms)}</div>
+        </div>
+      `).join('');
+    }
+
+    async function submitScore(scoreMs) {
+      const { error } = await supabase
+        .from('game_leaderboard')
+        .insert({
+          player_name: state.playerName,
+          character_id: state.selectedCharacter,
+          character_name: characters[state.selectedCharacter].name,
+          score_ms: scoreMs,
+          grid_size: state.mode
+        });
+
+      if (error) {
+        console.error('提交分数失败:', error);
+      }
+    }
 
     // 打乱数组
     function shuffleArray(array) {
@@ -810,6 +1246,9 @@
       const finalTime = performance.now() - state.startTime;
       finalTimeDisplay.textContent = formatTime(finalTime);
       progressFill.style.width = '100%';
+      
+      // 提交分数到排行榜
+      submitScore(Math.round(finalTime));
       
       // 创建庆祝粒子
       createParticles();
