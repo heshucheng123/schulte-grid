@@ -760,6 +760,125 @@
       color: var(--success);
     }
 
+    /* 自定义难度选择器 */
+    .custom-difficulty {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    #difficultySlider {
+      width: 100px;
+      height: 6px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background: var(--card-bg);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    #difficultySlider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 217, 255, 0.4);
+    }
+
+    #difficultySlider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(0, 217, 255, 0.4);
+    }
+
+    .diff-number-input {
+      width: 50px;
+      height: 32px;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      text-align: center;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .diff-number-input:focus {
+      border-color: var(--primary-start);
+      box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+    }
+
+    /* 隐藏number输入框的箭头 */
+    .diff-number-input::-webkit-outer-spin-button,
+    .diff-number-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .diff-number-input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    .diff-unit {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    /* 操作按钮 */
+    .memory-actions-row {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .memory-actions-row.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .memory-action-btn {
+      padding: 12px 28px;
+      border-radius: 25px;
+      border: 2px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .memory-action-btn:hover {
+      border-color: var(--primary-start);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
+    }
+
+    .memory-action-btn.primary {
+      background: linear-gradient(135deg, var(--primary-start), var(--primary-end));
+      color: white;
+      border-color: transparent;
+    }
+
+    .memory-action-btn.primary:hover {
+      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+    }
+
     /* 数字入场动画 */
     @keyframes numberEnter {
       0% { opacity: 0; transform: scale(0.5); }
@@ -991,6 +1110,20 @@
           <span class="memory-stat-label">最佳成绩</span>
           <span class="memory-stat-value success" id="memoryBest">4位</span>
         </div>
+        <div class="memory-stat">
+          <span class="memory-stat-label">自定义难度</span>
+          <div class="custom-difficulty">
+            <input type="range" id="difficultySlider" min="4" max="20" value="4">
+            <input type="number" id="difficultyInput" min="4" max="20" value="4" class="diff-number-input">
+            <span class="diff-unit">位</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="memory-actions-row">
+        <button class="memory-action-btn" id="restartFromBestBtn">再来一次</button>
+        <button class="memory-action-btn primary" id="continueChallengeBtn">继续挑战</button>
       </div>
     </div>
   </div>
@@ -1244,13 +1377,20 @@
     const resultText = document.getElementById('resultText');
     const resultAnswer = document.getElementById('resultAnswer');
     const resultBtn = document.getElementById('resultBtn');
+    const restartFromBestBtn = document.getElementById('restartFromBestBtn');
+    const continueChallengeBtn = document.getElementById('continueChallengeBtn');
+    const memoryActionsRow = document.querySelector('.memory-actions-row');
+    const difficultySlider = document.getElementById('difficultySlider');
+    const difficultyInput = document.getElementById('difficultyInput');
 
     const memoryState = {
       currentLevel: 4,
       bestLevel: parseInt(sessionStorage.getItem('memoryBestLevel')) || 4,
-      targetNumbers: [], // 改为数组存储每个数字
+      selectedDifficulty: parseInt(sessionStorage.getItem('memoryDifficulty')) || 4,
+      targetNumbers: [],
       isShowingNumbers: false,
-      hasChecked: false
+      hasChecked: false,
+      lastPlayedLevel: 4 // 上一局游戏的位数
     };
 
     // 停止记忆游戏的任何活动
@@ -1259,6 +1399,8 @@
       memoryState.hasChecked = false;
       // 隐藏结果弹窗
       resultOverlay.classList.remove('show');
+      // 隐藏操作按钮
+      memoryActionsRow.classList.remove('show');
       // 隐藏输入区域
       inputsSection.style.display = 'none';
       // 清空数字显示
@@ -1276,16 +1418,122 @@
       inputsSection.style.display = 'none';
       numbersContainer.innerHTML = '';
       resultOverlay.classList.remove('show');
+      memoryActionsRow.classList.remove('show'); // 隐藏操作按钮
       memoryState.hasChecked = false;
       memoryState.isShowingNumbers = false;
       countdownTip.textContent = '点击下方按钮开始记忆挑战';
       startBtn.classList.remove('hidden');
       startBtn.querySelector('.start-btn-text').textContent = '开始挑战';
+      updateDifficultyUI();
     }
 
     function initMemoryGame() {
       resetMemoryGameState();
+      updateDifficultyUI();
     }
+
+    // 更新难度选择器UI
+    function updateDifficultyUI() {
+      difficultySlider.value = memoryState.selectedDifficulty;
+      difficultyInput.value = memoryState.selectedDifficulty;
+    }
+
+    // 滑块变化事件
+    difficultySlider.addEventListener('input', (e) => {
+      const level = parseInt(e.target.value);
+      memoryState.selectedDifficulty = level;
+      memoryState.currentLevel = level;
+      difficultyInput.value = level;
+      sessionStorage.setItem('memoryDifficulty', level);
+      memoryLevel.textContent = level + '位';
+    });
+
+    // 滑块松开时重置游戏
+    difficultySlider.addEventListener('change', (e) => {
+      const level = parseInt(e.target.value);
+      memoryState.selectedDifficulty = level;
+      memoryState.currentLevel = level;
+      sessionStorage.setItem('memoryDifficulty', level);
+      stopMemoryGame();
+      memoryLevel.textContent = memoryState.currentLevel + '位';
+    });
+
+    // 输入框变化事件
+    difficultyInput.addEventListener('input', (e) => {
+      let level = parseInt(e.target.value) || 4;
+      // 限制范围 4-20
+      level = Math.max(4, Math.min(20, level));
+      e.target.value = level;
+      memoryState.selectedDifficulty = level;
+      memoryState.currentLevel = level;
+      difficultySlider.value = level;
+      sessionStorage.setItem('memoryDifficulty', level);
+      memoryLevel.textContent = level + '位';
+    });
+
+    // 输入框失焦时重置游戏
+    difficultyInput.addEventListener('blur', (e) => {
+      let level = parseInt(e.target.value) || 4;
+      level = Math.max(4, Math.min(20, level));
+      e.target.value = level;
+      memoryState.selectedDifficulty = level;
+      memoryState.currentLevel = level;
+      difficultySlider.value = level;
+      sessionStorage.setItem('memoryDifficulty', level);
+      stopMemoryGame();
+      memoryLevel.textContent = memoryState.currentLevel + '位';
+    });
+
+    // 回车确认输入
+    difficultyInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.target.blur();
+      }
+    });
+
+    // "再来一次"按钮 - 用上一局的位数重新开始
+    restartFromBestBtn.addEventListener('click', () => {
+      // 隐藏操作按钮
+      memoryActionsRow.classList.remove('show');
+      
+      // 使用上一局的位数
+      memoryState.currentLevel = memoryState.lastPlayedLevel;
+      memoryLevel.textContent = memoryState.currentLevel + '位';
+      
+      // 关闭结果弹窗并重置游戏
+      resultOverlay.classList.remove('show');
+      setTimeout(() => {
+        numbersContainer.innerHTML = '';
+        inputsSection.style.display = 'none';
+        startBtn.classList.remove('hidden');
+        startBtn.querySelector('.start-btn-text').textContent = '再来一次';
+        countdownTip.textContent = '点击下方按钮开始记忆挑战';
+        memoryState.hasChecked = false;
+        memoryState.isShowingNumbers = false;
+      }, 300);
+    });
+
+    // "继续挑战"按钮 - 用更高的位数继续
+    continueChallengeBtn.addEventListener('click', () => {
+      // 隐藏操作按钮
+      memoryActionsRow.classList.remove('show');
+      
+      // 使用更高的位数（当前难度+1，但不能超过20）
+      memoryState.currentLevel = Math.min(memoryState.currentLevel + 1, 20);
+      memoryLevel.textContent = memoryState.currentLevel + '位';
+      
+      // 关闭结果弹窗并重置游戏
+      resultOverlay.classList.remove('show');
+      setTimeout(() => {
+        numbersContainer.innerHTML = '';
+        inputsSection.style.display = 'none';
+        startBtn.classList.remove('hidden');
+        startBtn.querySelector('.start-btn-text').textContent = '开始挑战';
+        countdownTip.textContent = '点击下方按钮开始记忆挑战';
+        memoryState.hasChecked = false;
+        memoryState.isShowingNumbers = false;
+      }, 300);
+    });
 
     // 开始按钮点击事件
     startBtn.addEventListener('click', () => {
@@ -1479,6 +1727,9 @@
       
       memoryState.hasChecked = true;
       
+      // 保存上一局位数（用于"再来一次"）
+      memoryState.lastPlayedLevel = memoryState.currentLevel;
+      
       // 显示结果弹窗
       setTimeout(() => {
         if (allCorrect) {
@@ -1487,11 +1738,14 @@
           resultText.style.color = 'var(--success)';
           resultAnswer.textContent = `答案是 ${memoryState.targetNumbers.join('')}`;
           
+          // 先记录通过的是哪一关，再递增
+          const passedLevel = memoryState.currentLevel;
           memoryState.currentLevel++;
           memoryLevel.textContent = memoryState.currentLevel + '位';
           
-          if (memoryState.currentLevel > memoryState.bestLevel) {
-            memoryState.bestLevel = memoryState.currentLevel;
+          // 只有通过的关卡达到或超过最佳成绩时才更新
+          if (passedLevel >= memoryState.bestLevel) {
+            memoryState.bestLevel = passedLevel;
             sessionStorage.setItem('memoryBestLevel', memoryState.bestLevel);
             memoryBest.textContent = memoryState.bestLevel + '位';
           }
@@ -1503,19 +1757,25 @@
           resultText.style.color = 'var(--error)';
           resultAnswer.textContent = `正确答案是 ${memoryState.targetNumbers.join('')}，你输入的是 ${answer}`;
           
-          memoryState.currentLevel = 4;
+          // 从最佳成绩继续（而非重置为4）
+          memoryState.currentLevel = memoryState.bestLevel;
           memoryLevel.textContent = memoryState.currentLevel + '位';
           
-          resultBtn.textContent = '重新开始';
+          resultBtn.textContent = '继续挑战';
         }
         
         resultOverlay.classList.add('show');
+        
+        // 显示操作按钮
+        memoryActionsRow.classList.add('show');
       }, 500);
     }
 
     // 结果弹窗继续按钮
     resultBtn.addEventListener('click', () => {
       resultOverlay.classList.remove('show');
+      // 隐藏操作按钮
+      memoryActionsRow.classList.remove('show');
       setTimeout(() => {
         // 重置并显示开始按钮
         numbersContainer.innerHTML = '';
