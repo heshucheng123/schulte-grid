@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>舒尔特方格训练</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -445,40 +445,6 @@
       width: 0%;
     }
 
-    /* 平板适配 */
-    @media (min-width: 481px) and (max-width: 1024px) {
-      .game-board.grid-5 {
-        width: min(500px, 80vw);
-        gap: 12px;
-        padding: 24px;
-      }
-
-      .game-board.grid-7 {
-        width: min(600px, 85vw);
-        gap: 10px;
-        padding: 22px;
-      }
-
-      .cell {
-        font-size: clamp(1.4rem, 5vw, 2.2rem);
-        border-radius: 14px;
-      }
-
-      .mode-btn {
-        padding: 12px 32px;
-        font-size: 1rem;
-      }
-
-      .random-btn {
-        width: 54px;
-        height: 54px;
-      }
-
-      .timer {
-        font-size: clamp(3rem, 10vw, 5rem);
-      }
-    }
-
     /* 手机适配 */
     @media (max-width: 480px) {
       .game-board {
@@ -488,6 +454,7 @@
       
       .cell {
         border-radius: 8px;
+        font-size: 1.2rem;
       }
       
       .mode-btn {
@@ -496,22 +463,69 @@
       }
     }
 
-    /* 大屏幕适配 */
-    @media (min-width: 1025px) {
+    /* 11.5英寸平板适配 (横屏约 1024px-1366px) */
+    @media (min-width: 768px) and (max-width: 1366px) {
       .game-board.grid-5 {
-        width: 480px;
+        width: min(520px, 65vh);
+        gap: 12px;
+        padding: 24px;
+      }
+
+      .game-board.grid-7 {
+        width: min(640px, 65vh);
+        gap: 10px;
+        padding: 22px;
+      }
+
+      .cell {
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        border-radius: 14px;
+      }
+
+      .mode-btn {
+        padding: 14px 36px;
+        font-size: 1.1rem;
+      }
+
+      .random-btn {
+        width: 56px;
+        height: 56px;
+      }
+
+      .random-btn svg {
+        width: 26px;
+        height: 26px;
+      }
+
+      .timer {
+        font-size: clamp(3rem, 8vw, 5rem);
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    /* 大屏幕适配 */
+    @media (min-width: 1367px) {
+      .game-board.grid-5 {
+        width: 540px;
         gap: 14px;
         padding: 28px;
       }
 
       .game-board.grid-7 {
-        width: 600px;
+        width: 680px;
         gap: 12px;
         padding: 26px;
       }
 
       .cell {
-        font-size: clamp(1.5rem, 2.5vw, 2rem);
+        font-size: clamp(1.8rem, 2.5vw, 2.4rem);
         border-radius: 16px;
       }
     }
