@@ -890,14 +890,15 @@
     <button class="theme-btn theme-3" data-theme="dark" title="纯黑质感"></button>
   </div>
 
+  <!-- 公共游戏切换按钮（始终可见） -->
+  <div class="game-switcher" style="margin-bottom: 20px;">
+    <button class="game-switch-btn active" data-game="schulte">舒尔特方格</button>
+    <button class="game-switch-btn" data-game="memory">数字记忆</button>
+  </div>
+
   <div class="container" id="schulteContainer">
     <h1>专注力训练</h1>
     <p class="subtitle">大脑健身房</p>
-
-    <div class="game-switcher">
-      <button class="game-switch-btn active" data-game="schulte">舒尔特方格</button>
-      <button class="game-switch-btn" data-game="memory">数字记忆</button>
-    </div>
 
     <div class="toolbar">
       <div class="mode-switcher">
@@ -1228,38 +1229,7 @@
       memoryGameInitialized: false // 数字记忆游戏是否已初始化
     };
 
-    gameSwitchBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const game = btn.dataset.game;
-        
-        // 如果点击的是当前游戏，不做任何操作
-        if (game === gameState.currentGame) return;
-        
-        // 更新按钮状态
-        gameSwitchBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        // 切换游戏显示
-        if (game === 'schulte') {
-          schulteContainer.style.display = 'flex';
-          memoryGame.style.display = 'none';
-          gameState.currentGame = 'schulte';
-        } else if (game === 'memory') {
-          schulteContainer.style.display = 'none';
-          memoryGame.style.display = 'flex';
-          gameState.currentGame = 'memory';
-          
-          // 仅在首次切换到记忆游戏时初始化
-          if (!gameState.memoryGameInitialized) {
-            initMemoryGame();
-            gameState.memoryGameInitialized = true;
-          } else {
-            // 重新初始化记忆游戏状态
-            resetMemoryGameState();
-          }
-        }
-      });
-    });
+    // 游戏切换功能已移至 initGame() 调用之后
 
     // ==================== 数字记忆游戏 ====================
     const numbersContainer = document.getElementById('numbersContainer');
@@ -1282,6 +1252,22 @@
       isShowingNumbers: false,
       hasChecked: false
     };
+
+    // 停止记忆游戏的任何活动
+    function stopMemoryGame() {
+      memoryState.isShowingNumbers = false;
+      memoryState.hasChecked = false;
+      // 隐藏结果弹窗
+      resultOverlay.classList.remove('show');
+      // 隐藏输入区域
+      inputsSection.style.display = 'none';
+      // 清空数字显示
+      numbersContainer.innerHTML = '';
+      // 显示开始按钮
+      startBtn.classList.remove('hidden');
+      startBtn.querySelector('.start-btn-text').textContent = '开始挑战';
+      countdownTip.textContent = '点击下方按钮开始记忆挑战';
+    }
 
     // 初始化/重置记忆游戏状态
     function resetMemoryGameState() {
@@ -1544,6 +1530,50 @@
 
     // 初始化舒尔特方格
     initGame();
+
+    // ==================== 游戏切换功能 ====================
+    // 必须在所有函数定义完成后注册事件
+    gameSwitchBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const game = btn.dataset.game;
+        
+        // 如果点击的是当前游戏，不做任何操作
+        if (game === gameState.currentGame) return;
+        
+        // 更新按钮状态
+        gameSwitchBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // 切换游戏显示
+        if (game === 'schulte') {
+          // 先停止记忆游戏的任何活动
+          stopMemoryGame();
+          // 重置并初始化舒尔特游戏
+          initGame();
+          schulteContainer.style.display = 'flex';
+          memoryGame.style.display = 'none';
+          gameState.currentGame = 'schulte';
+        } else if (game === 'memory') {
+          // 先停止舒尔特游戏的计时器
+          if (state.timerInterval) {
+            clearInterval(state.timerInterval);
+            state.timerInterval = null;
+          }
+          schulteContainer.style.display = 'none';
+          memoryGame.style.display = 'flex';
+          gameState.currentGame = 'memory';
+          
+          // 仅在首次切换到记忆游戏时初始化
+          if (!gameState.memoryGameInitialized) {
+            initMemoryGame();
+            gameState.memoryGameInitialized = true;
+          } else {
+            // 重新初始化记忆游戏状态
+            resetMemoryGameState();
+          }
+        }
+      });
+    });
 
     // ==================== 用户记录系统 ====================
     // 用户身份标识
