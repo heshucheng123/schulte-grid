@@ -445,7 +445,41 @@
       width: 0%;
     }
 
-    /* 响应式 */
+    /* 平板适配 */
+    @media (min-width: 481px) and (max-width: 1024px) {
+      .game-board.grid-5 {
+        width: min(500px, 80vw);
+        gap: 12px;
+        padding: 24px;
+      }
+
+      .game-board.grid-7 {
+        width: min(600px, 85vw);
+        gap: 10px;
+        padding: 22px;
+      }
+
+      .cell {
+        font-size: clamp(1.4rem, 5vw, 2.2rem);
+        border-radius: 14px;
+      }
+
+      .mode-btn {
+        padding: 12px 32px;
+        font-size: 1rem;
+      }
+
+      .random-btn {
+        width: 54px;
+        height: 54px;
+      }
+
+      .timer {
+        font-size: clamp(3rem, 10vw, 5rem);
+      }
+    }
+
+    /* 手机适配 */
     @media (max-width: 480px) {
       .game-board {
         gap: 6px;
@@ -459,6 +493,26 @@
       .mode-btn {
         padding: 8px 20px;
         font-size: 0.85rem;
+      }
+    }
+
+    /* 大屏幕适配 */
+    @media (min-width: 1025px) {
+      .game-board.grid-5 {
+        width: 480px;
+        gap: 14px;
+        padding: 28px;
+      }
+
+      .game-board.grid-7 {
+        width: 600px;
+        gap: 12px;
+        padding: 26px;
+      }
+
+      .cell {
+        font-size: clamp(1.5rem, 2.5vw, 2rem);
+        border-radius: 16px;
       }
     }
   </style>
